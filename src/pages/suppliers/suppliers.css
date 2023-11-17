@@ -1,0 +1,106 @@
+/* clientes.css */
+
+.btn-add-supplier {
+  padding: 0.5rem !important;
+}
+
+.btn-edit {
+  background-color: rgb(54, 63, 182) !important;
+  font-weight: var(--normal-font-size) !important;
+  border-radius: 1rem !important;
+}
+
+.btn-remove {
+  background-color: rgb(209, 52, 52) !important;
+  font-weight: var(--normal-font-size) !important;
+  border-radius: 1rem;
+}
+
+.add-supplier-container {
+  padding: 1rem 0rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.suppliers-container {
+  width: 80%;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.actions-columns {
+  width: 10rem;
+}
+
+.id-columns {
+  width: 5rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+  border-radius: 10px;
+}
+
+table,
+th,
+td {
+  border: 1px solid #ccc;
+}
+
+th,
+td {
+  padding: 10px;
+  text-align: left;
+}
+
+th {
+  background-color: var(--first-color) !important;
+  color: var(--body-color) !important;
+}
+
+tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+tr:nth-child(odd) {
+  background-color: #fff;
+}
+
+button {
+  padding: 5px 10px;
+  margin: 5px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+.novo-cliente {
+  background-color: #f2f2f2;
+  padding: 20px;
+  margin-top: 20px;
+  border: 1px solid #ccc;
+}
+
+h2 {
+  margin-bottom: 10px;
+}
+
+input {
+  width: 100%;
+  padding: 10px;
+  margin: 5px 0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+input:focus {
+  outline: none;
+}

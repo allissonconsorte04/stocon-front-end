@@ -1,0 +1,26 @@
+.login-container {
+  display: flex;
+  font-family: Arial, sans-serif;
+  height: 100vh;
+  background-color: #393939;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-card {
+  top: -3.25rem;
+}
+
+.modal-card-head {
+  justify-content: flex-end;
+  display: flex;
+}
+
+.modal-card-foot {
+  justify-content: center;
+}
+
+
+.modal-card-body {
+  padding: 2rem 2rem;
+}

@@ -1,0 +1,30 @@
+.card-container {
+    justify-content: center;
+    display: flex;
+    padding: 2rem;
+    bottom: 0;
+    gap: 100px;
+    align-items: center;
+}
+
+.card-content {
+    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+    width: 25%;
+    border-radius: 8px;
+    height: 100px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.btn-add {
+    padding: 0.3rem 0.5rem !important;
+  line-height: 1;
+  border-radius: 1.875rem;
+  box-shadow: 0 0 1px rgb(0 0 0 / 0%);
+  border: 1px solid transparent;
+  color: #fff;
+  display: inline-block;
+  background-color: var(--first-color);
+  font-weight: var(--font-bold);
+}

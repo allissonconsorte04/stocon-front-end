@@ -1,0 +1,22 @@
+.navbar {
+    background-color: var(--body-color);
+    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+    display: flex;
+    flex: 1;
+    justify-content: space-between;
+}
+
+.navbar-item img {
+    max-height: 3.75rem;
+    height: 3.5rem;
+}
+
+.navbar-route-items {
+    display: flex;
+    flex-direction: row;
+}
+
+.navbar-start {
+    flex: 1;
+    justify-content: space-between;
+}
