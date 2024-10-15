@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { LOCAL_STORAGE_USER_AUTH_KEY } from '../constants/storageKeys';
 
-const baseURL = 'http://localhost:3000/v1/';
+const baseURL = 'https://stocon-api-development.up.railway.app/v1/';
 
 const api = axios.create({
   baseURL: baseURL,
