@@ -8,6 +8,7 @@ import api from '../../services/api';
 import { Supplier } from '../suppliers/Suppliers';
 import { Category } from '../categories/Categories';
 import ModalProducts from '../../components/modal/ModalProducts';
+import { uploadImage } from '../../services/api-ocr';
 
 export interface Product {
   id?: number;
@@ -30,7 +31,7 @@ const newProduct = {
   quantity: 1,
   measurement: 'UN',
   code: ''
-}
+};
 
 const Products = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -38,6 +39,8 @@ const Products = () => {
   const [productParaEditar, setProductParaEditar] = useState<Product | null>(
     null
   );
+  const [selectedFile, setSelectedFile] = useState<File | null>(null); // Estado para o arquivo
+  const [uploadResponse, setUploadResponse] = useState<string>(''); // Estado para a resposta do upload
 
   useEffect(() => {
     getAllProducts();
@@ -50,7 +53,7 @@ const Products = () => {
         setProducts(response.data);
       })
       .catch((error) => {
-        console.error('Erro ao obter products:', error);
+        console.error('Erro ao obter produtos:', error);
       });
   };
 
@@ -63,11 +66,11 @@ const Products = () => {
     api
       .delete(`/products/${product.id}`)
       .then((response) => {
-        console.log('Product deletado: ', response.data);
+        console.log('Produto deletado: ', response.data);
         fecharModal();
       })
       .catch((error) => {
-        console.error('Erro ao deletar product: ', error);
+        console.error('Erro ao deletar produto: ', error);
       });
   };
 
@@ -77,6 +80,24 @@ const Products = () => {
     getAllProducts();
   };
 
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) {
+      setSelectedFile(event.target.files[0]);
+    }
+  };
+
+  const handleUploadFile = async () => {
+    if (selectedFile) {
+      try {
+        const result = await uploadImage(selectedFile);
+        setUploadResponse(result); // Exibe a resposta do backend
+        console.log('Upload bem-sucedido:', result);
+      } catch (error) {
+        console.error('Erro no upload do arquivo:', error);
+      }
+    }
+  };
+
   return (
     <div className="products-container">
       <div className="add-product-container">
@@ -84,8 +105,13 @@ const Products = () => {
           className="btn btn-add-product"
           onClick={() => handleEditarProduct(newProduct)}
         >
-          Adicionar Product +
+          Adicionar Produto +
         </button>
+        <div>
+          <input type="file" onChange={handleFileChange} />
+          <button onClick={handleUploadFile}>Upload Arquivo</button>
+          {uploadResponse && <div>Resposta do servidor: {uploadResponse}</div>}
+        </div>
       </div>
       <table>
         <thead>
@@ -114,26 +140,19 @@ const Products = () => {
               <td>{product.code}</td>
               <td>{product.category?.name}</td>
               <td>{product.supplier?.name}</td>
-              <td className="actions-columns">
-                <div style={{ justifyContent: 'center', display: 'flex' }}>
-                  <button
-                    className="btn-edit btn"
-                    onClick={() => handleEditarProduct(product)}
-                  >
-                    <FontAwesomeIcon icon={faEdit} />
-                  </button>
-                  <button
-                    className="btn btn-remove"
-                    onClick={() => handleRemoveProduct(product)}
-                  >
-                    <FontAwesomeIcon icon={faTrashAlt} />
-                  </button>
-                </div>
+              <td>
+                <button onClick={() => handleEditarProduct(product)}>
+                  <FontAwesomeIcon icon={faEdit} />
+                </button>
+                <button onClick={() => handleRemoveProduct(product)}>
+                  <FontAwesomeIcon icon={faTrashAlt} />
+                </button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
+
       {isModalVisible && (
         <ModalProducts
           productData={productParaEditar}
