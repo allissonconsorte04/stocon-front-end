@@ -3,6 +3,10 @@
     display: flex;
 }
 
+.modal-card {
+  top: auto;
+}
+
 .modal-card-foot {
     justify-content: center;
 }

@@ -69,19 +69,6 @@ tr:nth-child(odd) {
   background-color: #fff;
 }
 
-button {
-  padding: 5px 10px;
-  margin: 5px;
-  background-color: #007bff;
-  color: #fff;
-  border: none;
-  cursor: pointer;
-}
-
-button:hover {
-  background-color: #0056b3;
-}
-
 .novo-cliente {
   background-color: #f2f2f2;
   padding: 20px;
@@ -103,4 +90,31 @@ input {
 
 input:focus {
   outline: none;
+}
+
+
+.box-btns-prd {
+  display: flex;
+}
+
+.box-btns-prd input {
+  border-radius: 8px;
+  border: solid #ff4d61 2px;
+}
+
+.box-btns-prd input span {
+  color: #fff;
+}
+
+#file-upload-button {
+  background-color: red;
+}
+
+.box-btns-prd button {
+  width: 200px;
+  border-radius: 8px;
+}
+
+.btn {
+  border-radius: 8px !important;
 }
