@@ -3,12 +3,13 @@ import { useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEdit, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 
-import './products.css'; // Certifique-se de ter o arquivo de estilo adequado
+import './products.css';
 import api from '../../services/api';
 import { Supplier } from '../suppliers/Suppliers';
 import { Category } from '../categories/Categories';
 import ModalProducts from '../../components/modal/ModalProducts';
-import { uploadImage } from '../../services/api-ocr';
+
+import Loading from '../../components/loading/Loading';
 
 export interface Product {
   id?: number;
@@ -36,17 +37,16 @@ const newProduct = {
 const Products = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [isModalVisible, setModalVisible] = useState(false);
-  const [productParaEditar, setProductParaEditar] = useState<Product | null>(
-    null
-  );
-  const [selectedFile, setSelectedFile] = useState<File | null>(null); // Estado para o arquivo
-  const [uploadResponse, setUploadResponse] = useState<string>(''); // Estado para a resposta do upload
+  const [productParaEditar, setProductParaEditar] = useState<Product | null>(null);
+
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     getAllProducts();
   }, []);
 
   const getAllProducts = () => {
+    setLoading(true); // Ativa o loading enquanto busca os produtos
     api
       .get('/products')
       .then((response) => {
@@ -54,6 +54,9 @@ const Products = () => {
       })
       .catch((error) => {
         console.error('Erro ao obter produtos:', error);
+      })
+      .finally(() => {
+        setLoading(false); // Finaliza o loading quando os dados forem obtidos
       });
   };
 
@@ -80,114 +83,72 @@ const Products = () => {
     getAllProducts();
   };
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files) {
-      setSelectedFile(event.target.files[0]);
-    }
-  };
-
-  const handleUploadFile = async () => {
-    if (selectedFile) {
-      try {
-        const result = await uploadImage(selectedFile);
-        setUploadResponse(result); // Exibe a resposta do backend
-        console.log('Upload bem-sucedido:', result);
-      } catch (error) {
-        console.error('Erro no upload do arquivo:', error);
-      }
-    }
-  };
-
-  // const handleUploadFile = async () => {
-  //   if (selectedFile) {
-  //     try {
-  //       let result;
-  //       const fileType = selectedFile.type;
-
-  //       if (fileType === "text/csv" || fileType === "text/xml" || selectedFile.name.endsWith(".csv") || selectedFile.name.endsWith(".xml")) {
-  //         // Chama o serviço de tratamento de dados para CSV/XML
-  //         // result = await uploadDataFile(selectedFile);
-  //         console.log('envio arquivo');
-          
-  //       } else if (fileType.startsWith("image/")) {
-  //         // Chama o serviço de OCR para imagens
-  //         result = await uploadImage(selectedFile);
-  //       } else {
-  //         throw new Error("Tipo de arquivo não suportado");
-  //       }
-
-  //       setUploadResponse(result); // Exibe a resposta do backend
-  //       console.log('Upload bem-sucedido:', result);
-  //     } catch (error) {
-  //       console.error('Erro no upload do arquivo:', error);
-  //     }
-  //   }
-  // };
+  
 
   return (
     <div className="products-container">
-      <div className="add-product-container">
-        <button
-          className="btn btn-add-product"
-          onClick={() => handleEditarProduct(newProduct)}
-        >
-          Adicionar Produto +
-        </button>
-        <div className='box-btns-prd'>
-          <input
-            type="file"
-            accept=".csv, .xml, image/*"
-            onChange={handleFileChange}
-          />
-          <button onClick={handleUploadFile}>Upload Arquivo</button>
-          {uploadResponse && <div>Resposta do servidor: {uploadResponse}</div>}
-        </div>
-      </div>
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Nome</th>
-            <th>Descrição</th>
-            <th>Preço</th>
-            <th>Quantidade</th>
-            <th>Unidade</th>
-            <th>Código</th>
-            <th>Categoria</th>
-            <th>Fornecedor</th>
-            <th>Ações</th>
-          </tr>
-        </thead>
-        <tbody>
-          {products.map((product) => (
-            <tr key={product.id}>
-              <td className="id-columns">{product.id}</td>
-              <td>{product.name}</td>
-              <td>{product.description}</td>
-              <td>{product.price}</td>
-              <td>{product.quantity}</td>
-              <td>{product.measurement}</td>
-              <td>{product.code}</td>
-              <td>{product.category?.name}</td>
-              <td>{product.supplier?.name}</td>
-              <td>
-                <button onClick={() => handleEditarProduct(product)}>
-                  <FontAwesomeIcon icon={faEdit} />
-                </button>
-                <button onClick={() => handleRemoveProduct(product)}>
-                  <FontAwesomeIcon icon={faTrashAlt} />
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      {loading ? (
+        <Loading /> // Exibe o componente de loading enquanto o estado "loading" for true
+      ) : (
+        <>
+          <div className="add-product-container">
+            <button
+              className="btn btn-add-product"
+              onClick={() => handleEditarProduct(newProduct)}
+            >
+              Adicionar Produto +
+            </button>
+            
 
-      {isModalVisible && (
-        <ModalProducts
-          productData={productParaEditar}
-          fecharModal={fecharModal}
-        />
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Descrição</th>
+                <th>Preço</th>
+                <th>Quantidade</th>
+                <th>Unidade</th>
+                <th>Código</th>
+                <th>Categoria</th>
+                <th>Fornecedor</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              {products.map((product) => (
+                <tr key={product.id}>
+                  <td className="id-columns">{product.id}</td>
+                  <td>{product.name}</td>
+                  <td>{product.description}</td>
+                  <td>{product.price}</td>
+                  <td>{product.quantity}</td>
+                  <td>{product.measurement}</td>
+                  <td>{product.code}</td>
+                  <td>{product.category?.name}</td>
+                  <td>{product.supplier?.name}</td>
+                  <td>
+                    <button onClick={() => handleEditarProduct(product)}>
+                      <FontAwesomeIcon icon={faEdit} />
+                    </button>
+                    <button onClick={() => handleRemoveProduct(product)}>
+                      <FontAwesomeIcon icon={faTrashAlt} />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          {isModalVisible && (
+            <ModalProducts
+              productData={productParaEditar}
+              fecharModal={fecharModal}
+            />
+          )}
+        </>
       )}
     </div>
   );

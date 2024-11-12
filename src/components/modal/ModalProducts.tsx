@@ -4,6 +4,7 @@ import api from "../../services/api";
 import { Product } from "../../pages/products/Products";
 import { Category } from "../../pages/categories/Categories";
 import { Supplier } from "../../pages/suppliers/Suppliers";
+import { uploadImage } from '../../services/api-ocr';
 
 interface ModalProductsProps {
   productData: Product | null;
@@ -16,6 +17,9 @@ const ModalProducts: React.FC<ModalProductsProps> = ({
 }) => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploadResponse, setUploadResponse] = useState<string>('');
   const [product, setProduct] = useState<Product>({
     id: productData?.id || undefined,
     name: "",
@@ -67,6 +71,50 @@ const ModalProducts: React.FC<ModalProductsProps> = ({
     }
   };
 
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) {
+      setSelectedFile(event.target.files[0]);
+    }
+  };
+
+  const handleUploadFile = async () => {
+    if (selectedFile) {
+      setLoading(true); // Ativa o loading enquanto o arquivo é enviado
+      try {
+        let result;
+        const fileType = selectedFile.type;
+
+        if (fileType === "text/csv" || fileType === "text/xml" || selectedFile.name.endsWith(".csv") || selectedFile.name.endsWith(".xml")) {
+          console.log('envio arquivo');
+        } else if (fileType.startsWith("image/")) {
+          result = await uploadImage(selectedFile);
+        } else {
+          throw new Error("Tipo de arquivo não suportado");
+        }
+
+        // Atualiza o estado do produto com os dados da resposta do servidor
+        if (result && result[0]) {
+          const productData = result[0]; // Supondo que a resposta é um array
+          setProduct({
+            ...product,
+            name: productData.productName || product.name, // Preenche o nome do produto
+            code: productData.barCode || product.code, // Preenche o código de barras
+            description: productData.measurement || product.description, // Exemplo de preenchimento de descrição
+            // Adicione outros campos conforme necessário
+          });
+
+        }
+
+        setUploadResponse(result);
+        console.log('Upload bem-sucedido:', result);
+      } catch (error) {
+        console.error('Erro no upload do arquivo:', error);
+      } finally {
+        setLoading(false); // Finaliza o loading quando o upload for concluído
+      }
+    }
+  };
+
   return (
     <div className="modal is-active">
       <div className="modal-background" onClick={fecharModal}></div>
@@ -80,6 +128,17 @@ const ModalProducts: React.FC<ModalProductsProps> = ({
         </header>
         <section className="modal-card-body">
           <div>
+            <div className="box-btns-prd">
+              <input
+                type="file"
+                accept=".csv, .xml, image/*"
+                onChange={handleFileChange}
+              />
+              <button onClick={handleUploadFile}>Upload Arquivo</button>
+              {loading && <div>Carregando...</div>}
+              {/* {uploadResponse && <div>Resposta do servidor: {JSON.stringify(uploadResponse)}</div>} */}
+            </div>
+            
             <div className="field">
               <label className="label">Nome</label>
               <div className="control">
