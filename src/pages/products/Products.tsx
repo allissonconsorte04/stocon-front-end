@@ -13,9 +13,9 @@ import Loading from '../../components/loading/Loading';
 
 export interface Product {
   id?: number;
-  name: string;
+  productName: string;
   description: string;
-  price: number;
+  unit_price: number;
   quantity: number;
   category_id?: number | null;
   measurement: string;
@@ -26,9 +26,9 @@ export interface Product {
 }
 
 const newProduct = {
-  name: '',
+  productName: '',
   description: '',
-  price: 0,
+  unit_price: 0,
   quantity: 1,
   measurement: 'UN',
   code: ''
@@ -121,9 +121,9 @@ const Products = () => {
               {products.map((product) => (
                 <tr key={product.id}>
                   <td className="id-columns">{product.id}</td>
-                  <td>{product.name}</td>
+                  <td>{product.productName}</td>
                   <td>{product.description}</td>
-                  <td>{product.price}</td>
+                  <td>{product.unit_price}</td>
                   <td>{product.quantity}</td>
                   <td>{product.measurement}</td>
                   <td>{product.code}</td>

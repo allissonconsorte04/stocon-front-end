@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import "./modalClientes.css";
 import api from "../../services/api";
-import { Product } from "../../pages/products/Products";
+import { Product } from '../../pages/products/Products';
 import { Category } from "../../pages/categories/Categories";
 import { Supplier } from "../../pages/suppliers/Suppliers";
 import { uploadImage } from "../../services/api-ocr";
@@ -10,6 +10,7 @@ interface ModalProductsProps {
   productData: Product | null;
   fecharModal: () => void;
 }
+
 
 const ModalProducts: React.FC<ModalProductsProps> = ({
   productData,
@@ -22,12 +23,17 @@ const ModalProducts: React.FC<ModalProductsProps> = ({
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadResponse, setUploadResponse] = useState<string>("");
 
+  const [currentProductIndex, setCurrentProductIndex] = useState(0);
+  const [productsData, setProductsData] = useState<Product[]>([]);  // Tipagem correta para o array
+ 
+
+
   const initialProductState: Product = useMemo(
     () => ({
       id: productData?.id || undefined,
-      name: productData?.name || "",
+      productName: productData?.productName || "",
       description: productData?.description || "",
-      price: productData?.price || 0,
+      unit_price: productData?.unit_price || 0,
       quantity: productData?.quantity || 1,
       measurement: productData?.measurement || "UN",
       code: productData?.code || "",
@@ -36,7 +42,7 @@ const ModalProducts: React.FC<ModalProductsProps> = ({
     }),
     [productData]
   );
-  
+
 
   const [product, setProduct] = useState<Product>(initialProductState);
 
@@ -54,15 +60,15 @@ const ModalProducts: React.FC<ModalProductsProps> = ({
   }, [initialProductState]);
 
   const validateForm = () => {
-    if (!product.name) return "Nome é obrigatório.";
-    if (product.price <= 0) return "Preço deve ser maior que zero.";
+    if (!product.productName) return "Nome é obrigatório.";
+    if (product.unit_price <= 0) return "Preço deve ser maior que zero.";
     if (product.quantity <= 0) return "Quantidade deve ser maior que zero.";
     if (!product.category_id) return "Selecione uma categoria.";
     if (!product.supplier_id) return "Selecione um fornecedor.";
     return null;
   };
 
-  const handleSalvar = () => {
+  const handleSaveAndUpdate = () => {
     const errorMessage = validateForm();
     if (errorMessage) {
       alert(errorMessage);
@@ -70,6 +76,8 @@ const ModalProducts: React.FC<ModalProductsProps> = ({
     }
 
     setIsSaving(true);
+
+    // Salva o produto atual na API
     const request = product.id
       ? api.put(`/products/${product.id}`, product)
       : api.post("/products/", product);
@@ -77,7 +85,27 @@ const ModalProducts: React.FC<ModalProductsProps> = ({
     request
       .then((response) => {
         console.log("Produto salvo com sucesso:", response.data);
-        fecharModal();
+
+        // Depois de salvar, incrementa o índice para o próximo produto
+        const nextIndex = currentProductIndex + 1;
+
+        // Verifica se ainda existem mais produtos para carregar
+        if (nextIndex < productsData.length) {
+          setCurrentProductIndex(nextIndex); // Atualiza o índice do produto atual
+          const nextProductData = productsData[nextIndex];  // Carrega os dados do próximo produto
+
+          setProduct({
+            ...product,
+            productName: nextProductData.productName || product.productName,  // Acessando 'name' e outras propriedades corretamente
+            code: nextProductData.code || product.code,
+            description: nextProductData.description || product.description,
+            unit_price: nextProductData.unit_price || product.unit_price,
+            quantity: nextProductData.quantity || product.quantity,
+          });
+        } else {
+          fecharModal(); // Se não houver mais produtos, fecha a modal  
+        }
+        
       })
       .catch((error) => {
         alert("Ocorreu um erro ao salvar o produto. Tente novamente.");
@@ -109,18 +137,23 @@ const ModalProducts: React.FC<ModalProductsProps> = ({
           throw new Error("Tipo de arquivo não suportado.");
         }
 
-        if (result && result[0]) {
-          const productData = result[0];
+        if (result) {
+          setProductsData(result);  // Armazena os produtos no estado
+          const productData = result[currentProductIndex];  // Usa o produto atual
+          
           setProduct({
             ...product,
-            name: productData.productName || product.name,
-            code: productData.barCode || product.code,
+            productName: productData.productName || product.productName,
+            code: productData.barCode || product.code || productData.code,
             description: productData.measurement || product.description,
+            unit_price: productData.unit_price || product.unit_price || productData.total_price,
+            quantity: productData.quaquantity || product.quantity,
           });
         }
 
         setUploadResponse(result);
         console.log("Upload bem-sucedido:", result);
+
       } catch (error) {
         console.error("Erro no upload do arquivo:", error);
       } finally {
@@ -151,11 +184,7 @@ const ModalProducts: React.FC<ModalProductsProps> = ({
               <button onClick={handleUploadFile} disabled={loading}>
                 {loading ? "Carregando..." : "Upload Arquivo"}
               </button>
-              {uploadResponse && (
-                <div className="notification is-primary">
-                  Upload bem-sucedido: {JSON.stringify(uploadResponse)}
-                </div>
-              )}
+
             </div>
 
             <div className="field">
@@ -165,9 +194,9 @@ const ModalProducts: React.FC<ModalProductsProps> = ({
                   className="input"
                   type="text"
                   placeholder="Nome"
-                  value={product.name}
+                  value={product.productName}
                   onChange={(e) =>
-                    setProduct({ ...product, name: e.target.value })
+                    setProduct({ ...product, productName: e.target.value })
                   }
                 />
               </div>
@@ -197,11 +226,11 @@ const ModalProducts: React.FC<ModalProductsProps> = ({
                   className="input"
                   type="number"
                   placeholder="Preço"
-                  value={product.price}
+                  value={product.unit_price}
                   onChange={(e) =>
                     setProduct({
                       ...product,
-                      price: parseFloat(e.target.value),
+                      unit_price: Number(e.target.value),
                     })
                   }
                 />
@@ -291,14 +320,10 @@ const ModalProducts: React.FC<ModalProductsProps> = ({
                 </div>
               </div>
             </div>
-          </div>  
+          </div>
         </section>
         <footer className="modal-card-foot">
-          <button
-            className="btn is-success"
-            onClick={handleSalvar}
-            disabled={isSaving}
-          >
+          <button onClick={handleSaveAndUpdate} disabled={isSaving}>
             {isSaving ? "Salvando..." : "Salvar"}
           </button>
           <button className="btn" onClick={fecharModal}>
