@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import "./modalClientes.css";
 import api from "../../services/api";
 import { Product } from "../../pages/products/Products";
 import { Category } from "../../pages/categories/Categories";
 import { Supplier } from "../../pages/suppliers/Suppliers";
-import { uploadImage } from '../../services/api-ocr';
+import { uploadImage } from "../../services/api-ocr";
 
 interface ModalProductsProps {
   productData: Product | null;
@@ -18,57 +18,74 @@ const ModalProducts: React.FC<ModalProductsProps> = ({
   const [categories, setCategories] = useState<Category[]>([]);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [loading, setLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [uploadResponse, setUploadResponse] = useState<string>('');
-  const [product, setProduct] = useState<Product>({
-    id: productData?.id || undefined,
-    name: "",
-    description: "",
-    price: 0,
-    quantity: 1,
-    measurement: "UN",
-    code: "",
-    supplier_id: null,
-    category_id: null
-  });
+  const [uploadResponse, setUploadResponse] = useState<string>("");
+
+  const initialProductState: Product = useMemo(
+    () => ({
+      id: productData?.id || undefined,
+      name: productData?.name || "",
+      description: productData?.description || "",
+      price: productData?.price || 0,
+      quantity: productData?.quantity || 1,
+      measurement: productData?.measurement || "UN",
+      code: productData?.code || "",
+      supplier_id: productData?.supplier_id || null,
+      category_id: productData?.category_id || null,
+    }),
+    [productData]
+  );
+  
+
+  const [product, setProduct] = useState<Product>(initialProductState);
 
   useEffect(() => {
-    api.get("/categories").then((response) => {
-      setCategories(response.data);
-    });
-
-    api.get("/suppliers").then((response) => {
-      setSuppliers(response.data);
-    });
-
-    if (productData) {
-      setProduct(productData);
+    if (!categories.length) {
+      api.get("/categories").then((response) => setCategories(response.data));
     }
-  }, [productData]);
+    if (!suppliers.length) {
+      api.get("/suppliers").then((response) => setSuppliers(response.data));
+    }
+  }, []);
+
+  useEffect(() => {
+    setProduct(initialProductState);
+  }, [initialProductState]);
+
+  const validateForm = () => {
+    if (!product.name) return "Nome é obrigatório.";
+    if (product.price <= 0) return "Preço deve ser maior que zero.";
+    if (product.quantity <= 0) return "Quantidade deve ser maior que zero.";
+    if (!product.category_id) return "Selecione uma categoria.";
+    if (!product.supplier_id) return "Selecione um fornecedor.";
+    return null;
+  };
 
   const handleSalvar = () => {
-    console.log('Estado do produto antes da requisição:', product);
-    if (product.id) {
-      api
-        .put(`/products/${product.id}`, product)
-        .then((response) => {
-          console.log("Product Atualizado: ", response.data);
-          fecharModal();
-        })
-        .catch((error) => {
-          console.error("Erro ao atualizar product: ", error);
-        });
-    } else {
-      api
-        .post("/products/", product)
-        .then((response) => {
-          console.log("Product criado: ", response.data);
-          fecharModal();
-        })
-        .catch((error) => {
-          console.error("Erro ao adicionar product: ", error);
-        });
+    const errorMessage = validateForm();
+    if (errorMessage) {
+      alert(errorMessage);
+      return;
     }
+
+    setIsSaving(true);
+    const request = product.id
+      ? api.put(`/products/${product.id}`, product)
+      : api.post("/products/", product);
+
+    request
+      .then((response) => {
+        console.log("Produto salvo com sucesso:", response.data);
+        fecharModal();
+      })
+      .catch((error) => {
+        alert("Ocorreu um erro ao salvar o produto. Tente novamente.");
+        console.error("Erro ao salvar produto:", error);
+      })
+      .finally(() => {
+        setIsSaving(false);
+      });
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -79,38 +96,35 @@ const ModalProducts: React.FC<ModalProductsProps> = ({
 
   const handleUploadFile = async () => {
     if (selectedFile) {
-      setLoading(true); // Ativa o loading enquanto o arquivo é enviado
+      setLoading(true);
       try {
         let result;
         const fileType = selectedFile.type;
 
-        if (fileType === "text/csv" || fileType === "text/xml" || selectedFile.name.endsWith(".csv") || selectedFile.name.endsWith(".xml")) {
-          console.log('envio arquivo');
+        if (fileType === "text/csv" || fileType === "text/xml") {
+          console.log("Processamento de CSV ou XML ainda não implementado.");
         } else if (fileType.startsWith("image/")) {
           result = await uploadImage(selectedFile);
         } else {
-          throw new Error("Tipo de arquivo não suportado");
+          throw new Error("Tipo de arquivo não suportado.");
         }
 
-        // Atualiza o estado do produto com os dados da resposta do servidor
         if (result && result[0]) {
-          const productData = result[0]; // Supondo que a resposta é um array
+          const productData = result[0];
           setProduct({
             ...product,
-            name: productData.productName || product.name, // Preenche o nome do produto
-            code: productData.barCode || product.code, // Preenche o código de barras
-            description: productData.measurement || product.description, // Exemplo de preenchimento de descrição
-            // Adicione outros campos conforme necessário
+            name: productData.productName || product.name,
+            code: productData.barCode || product.code,
+            description: productData.measurement || product.description,
           });
-
         }
 
         setUploadResponse(result);
-        console.log('Upload bem-sucedido:', result);
+        console.log("Upload bem-sucedido:", result);
       } catch (error) {
-        console.error('Erro no upload do arquivo:', error);
+        console.error("Erro no upload do arquivo:", error);
       } finally {
-        setLoading(false); // Finaliza o loading quando o upload for concluído
+        setLoading(false);
       }
     }
   };
@@ -134,11 +148,16 @@ const ModalProducts: React.FC<ModalProductsProps> = ({
                 accept=".csv, .xml, image/*"
                 onChange={handleFileChange}
               />
-              <button onClick={handleUploadFile}>Upload Arquivo</button>
-              {loading && <div>Carregando...</div>}
-              {/* {uploadResponse && <div>Resposta do servidor: {JSON.stringify(uploadResponse)}</div>} */}
+              <button onClick={handleUploadFile} disabled={loading}>
+                {loading ? "Carregando..." : "Upload Arquivo"}
+              </button>
+              {uploadResponse && (
+                <div className="notification is-primary">
+                  Upload bem-sucedido: {JSON.stringify(uploadResponse)}
+                </div>
+              )}
             </div>
-            
+
             <div className="field">
               <label className="label">Nome</label>
               <div className="control">
@@ -153,6 +172,7 @@ const ModalProducts: React.FC<ModalProductsProps> = ({
                 />
               </div>
             </div>
+            {/* Restante dos campos... */}
             <div className="field">
               <label className="label">Descrição</label>
               <div className="control">
@@ -271,11 +291,15 @@ const ModalProducts: React.FC<ModalProductsProps> = ({
                 </div>
               </div>
             </div>
-          </div>
+          </div>  
         </section>
         <footer className="modal-card-foot">
-          <button className="btn is-success" onClick={handleSalvar}>
-            Salvar
+          <button
+            className="btn is-success"
+            onClick={handleSalvar}
+            disabled={isSaving}
+          >
+            {isSaving ? "Salvando..." : "Salvar"}
           </button>
           <button className="btn" onClick={fecharModal}>
             Cancelar
