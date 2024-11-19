@@ -178,11 +178,11 @@ const ModalProducts: React.FC<ModalProductsProps> = ({
 
         <header className="modal-card-head">
           <div className="product-counter">
-            {/* {productsData.length > 0 && ( */}
+            {productsData.length > 0 && (
               <span>
                {`Produto ${currentProductIndex + 1} de ${productsData.length}`}
               </span>
-              {/* )}  */}
+             )}  
           </div>
           <button
             className="delete"
