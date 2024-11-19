@@ -67,7 +67,6 @@ const ModalProducts: React.FC<ModalProductsProps> = ({
     if (!product.category_id) return "Selecione uma categoria.";
     if (!product.supplier_id) return "Selecione um fornecedor.";
     if (!product.code) return "Digite o codigo do produto.";
-    if (!product.category) return "Selecione uma categoria.";
     return null;
   };
 
@@ -169,17 +168,37 @@ const ModalProducts: React.FC<ModalProductsProps> = ({
   };
 
   return (
+
     <div className="modal is-active">
+
+
       <div className="modal-background" onClick={fecharModal}></div>
+
       <div className="modal-card">
+
         <header className="modal-card-head">
+          <div className="product-counter">
+            {/* {productsData.length > 0 && ( */}
+              <span>
+               {`Produto ${currentProductIndex + 1} de ${productsData.length}`}
+              </span>
+              {/* )}  */}
+          </div>
           <button
             className="delete"
             aria-label="close"
             onClick={fecharModal}
           ></button>
+
         </header>
         <section className="modal-card-body">
+          {loading && (
+            <div className="loading-overlay">
+              <div className="loading-message">Carregando o seu arquivo...</div>
+            </div>
+          )
+          }
+
           <div>
             <div className="box-btns-prd">
               <input
@@ -326,9 +345,13 @@ const ModalProducts: React.FC<ModalProductsProps> = ({
                     ))}
                   </select>
                 </div>
+
               </div>
+
             </div>
+
           </div>
+
         </section>
         <footer className="modal-card-foot">
           <button className="button-salvar" onClick={handleSaveAndUpdate} disabled={isSaving}>
@@ -338,8 +361,11 @@ const ModalProducts: React.FC<ModalProductsProps> = ({
             Cancelar
           </button>
         </footer>
+
       </div>
+
     </div>
+
   );
 };
 

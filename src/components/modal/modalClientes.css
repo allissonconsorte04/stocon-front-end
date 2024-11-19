@@ -1,6 +1,8 @@
 .modal-card-head {
-    justify-content: flex-end;
+    justify-content: space-between;
+    align-items: center;
     display: flex;
+    width: '100%';
 }
 
 .modal-card {
@@ -54,3 +56,35 @@
       background-color: #f2f2f2;
     }
   }
+
+  .product-counter {
+    position: flex;
+    top: 10px;
+    right: 15px;
+    font-size: 0.9rem;
+    color: #555;
+  }
+
+  .loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5); /* Fundo semi-transparente */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10; /* Certifique-se de que fica acima do conteúdo do modal */
+  }
+  
+  .loading-message {
+    color: white;
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-align: center;
+    padding: 20px;
+    background: "#007bff"; /* Fundo para destacar o texto */
+    border-radius: 8px;
+  }
+  
