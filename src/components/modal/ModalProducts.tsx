@@ -25,15 +25,15 @@ const ModalProducts: React.FC<ModalProductsProps> = ({
 
   const [currentProductIndex, setCurrentProductIndex] = useState(0);
   const [productsData, setProductsData] = useState<Product[]>([]);  // Tipagem correta para o array
- 
+
 
 
   const initialProductState: Product = useMemo(
     () => ({
       id: productData?.id || undefined,
-      productName: productData?.productName || "",
+      name: productData?.name || "",
       description: productData?.description || "",
-      unit_price: productData?.unit_price || 0,
+      price: productData?.price || '',
       quantity: productData?.quantity || 1,
       measurement: productData?.measurement || "UN",
       code: productData?.code || "",
@@ -43,6 +43,7 @@ const ModalProducts: React.FC<ModalProductsProps> = ({
     [productData]
   );
 
+  console.log(initialProductState.price)
 
   const [product, setProduct] = useState<Product>(initialProductState);
 
@@ -60,11 +61,13 @@ const ModalProducts: React.FC<ModalProductsProps> = ({
   }, [initialProductState]);
 
   const validateForm = () => {
-    if (!product.productName) return "Nome é obrigatório.";
-    if (product.unit_price <= 0) return "Preço deve ser maior que zero.";
+    if (!product.name) return "Nome é obrigatório.";
+    if (product.price <= '0') return "Preço deve ser maior que zero.";
     if (product.quantity <= 0) return "Quantidade deve ser maior que zero.";
     if (!product.category_id) return "Selecione uma categoria.";
     if (!product.supplier_id) return "Selecione um fornecedor.";
+    if (!product.code) return "Digite o codigo do produto.";
+    if (!product.category) return "Selecione uma categoria.";
     return null;
   };
 
@@ -92,20 +95,24 @@ const ModalProducts: React.FC<ModalProductsProps> = ({
         // Verifica se ainda existem mais produtos para carregar
         if (nextIndex < productsData.length) {
           setCurrentProductIndex(nextIndex); // Atualiza o índice do produto atual
-          const nextProductData = productsData[nextIndex];  // Carrega os dados do próximo produto
+          const nextProductData = productsData[nextIndex];
+          // Carrega os dados do próximo produto
 
-          setProduct({
-            ...product,
-            productName: nextProductData.productName || product.productName,  // Acessando 'name' e outras propriedades corretamente
-            code: nextProductData.code || product.code,
-            description: nextProductData.description || product.description,
-            unit_price: nextProductData.unit_price || product.unit_price,
-            quantity: nextProductData.quantity || product.quantity,
-          });
+          setProduct((prevProduct) => ({
+            ...prevProduct,  // Aqui você usa 'prevProduct' corretamente, que é o valor anterior
+            name: nextProductData.name || prevProduct.name,
+            code: nextProductData.code || prevProduct.code,
+            description: nextProductData.description || prevProduct.description,
+            price: nextProductData.price || prevProduct.price,  // Atualiza o preço com o valor convertido
+            quantity: nextProductData.quantity || prevProduct.quantity,
+            measurement: nextProductData.measurement || prevProduct.measurement,
+            supplier_id: nextProductData.supplier_id || prevProduct.supplier_id,
+            category_id: nextProductData.category_id || prevProduct.category_id,
+          }));
         } else {
           fecharModal(); // Se não houver mais produtos, fecha a modal  
         }
-        
+
       })
       .catch((error) => {
         alert("Ocorreu um erro ao salvar o produto. Tente novamente.");
@@ -140,13 +147,12 @@ const ModalProducts: React.FC<ModalProductsProps> = ({
         if (result) {
           setProductsData(result);  // Armazena os produtos no estado
           const productData = result[currentProductIndex];  // Usa o produto atual
-          
           setProduct({
             ...product,
-            productName: productData.productName || product.productName,
+            name: productData.name || product.name,
             code: productData.barCode || product.code || productData.code,
             description: productData.measurement || product.description,
-            unit_price: productData.unit_price || product.unit_price || productData.total_price,
+            price: productData.unit_price || product.price || productData.total_price,
             quantity: productData.quaquantity || product.quantity,
           });
         }
@@ -194,9 +200,9 @@ const ModalProducts: React.FC<ModalProductsProps> = ({
                   className="input"
                   type="text"
                   placeholder="Nome"
-                  value={product.productName}
+                  value={product.name}
                   onChange={(e) =>
-                    setProduct({ ...product, productName: e.target.value })
+                    setProduct({ ...product, name: e.target.value })
                   }
                 />
               </div>
@@ -224,13 +230,13 @@ const ModalProducts: React.FC<ModalProductsProps> = ({
               <div className="control">
                 <input
                   className="input"
-                  type="number"
+                  type="text"
                   placeholder="Preço"
-                  value={product.unit_price}
+                  value={product.price}
                   onChange={(e) =>
                     setProduct({
                       ...product,
-                      unit_price: Number(e.target.value),
+                      price: e.target.value,
                     })
                   }
                 />
@@ -257,6 +263,7 @@ const ModalProducts: React.FC<ModalProductsProps> = ({
               <label className="label">Código</label>
               <div className="control">
                 <input
+                  required
                   className="input"
                   type="text"
                   placeholder="Código"
@@ -275,6 +282,7 @@ const ModalProducts: React.FC<ModalProductsProps> = ({
               <div className="control">
                 <div className="select">
                   <select
+                    required
                     value={product.category_id || ''}
                     onChange={(e) =>
                       setProduct({
@@ -323,7 +331,7 @@ const ModalProducts: React.FC<ModalProductsProps> = ({
           </div>
         </section>
         <footer className="modal-card-foot">
-          <button onClick={handleSaveAndUpdate} disabled={isSaving}>
+          <button className="button-salvar" onClick={handleSaveAndUpdate} disabled={isSaving}>
             {isSaving ? "Salvando..." : "Salvar"}
           </button>
           <button className="btn" onClick={fecharModal}>

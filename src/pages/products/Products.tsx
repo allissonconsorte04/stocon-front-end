@@ -13,9 +13,9 @@ import Loading from '../../components/loading/Loading';
 
 export interface Product {
   id?: number;
-  productName: string;
+  name: string;
   description: string;
-  unit_price: number;
+  price: string;
   quantity: number;
   category_id?: number | null;
   measurement: string;
@@ -26,9 +26,9 @@ export interface Product {
 }
 
 const newProduct = {
-  productName: '',
+  name: '',
   description: '',
-  unit_price: 0,
+  price: "0",
   quantity: 1,
   measurement: 'UN',
   code: ''
@@ -66,24 +66,26 @@ const Products = () => {
   };
 
   const handleRemoveProduct = (product: Product) => {
-    api
-      .delete(`/products/${product.id}`)
-      .then((response) => {
-        console.log('Produto deletado: ', response.data);
-        fecharModal();
-      })
-      .catch((error) => {
-        console.error('Erro ao deletar produto: ', error);
-      });
+    const confirmDelete = window.confirm(`Tem certeza que deseja excluir o produto "${product.name}"?`);
+  
+    if (confirmDelete) {
+      api
+        .delete(`/products/${product.id}`)
+        .then((response) => {
+          console.log("Produto deletado: ", response.data);
+          fecharModal();
+        })
+        .catch((error) => {
+          console.error("Erro ao deletar produto: ", error);
+        });
+    }
   };
-
   const fecharModal = () => {
     setModalVisible(false);
     setProductParaEditar(null);
     getAllProducts();
   };
 
-  
 
   return (
     <div className="products-container">
@@ -121,9 +123,9 @@ const Products = () => {
               {products.map((product) => (
                 <tr key={product.id}>
                   <td className="id-columns">{product.id}</td>
-                  <td>{product.productName}</td>
+                  <td>{product.name}</td>
                   <td>{product.description}</td>
-                  <td>{product.unit_price}</td>
+                  <td>{product.price}</td>
                   <td>{product.quantity}</td>
                   <td>{product.measurement}</td>
                   <td>{product.code}</td>

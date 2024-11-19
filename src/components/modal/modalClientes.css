@@ -16,6 +16,18 @@
     padding: 2rem 2rem;
 }
 
+.button-salvar{
+  padding: 0.75rem 2rem;
+  line-height: 1;
+  border-radius: 7px;
+  box-shadow: 0 0 1px rgb(0 0 0 / 0%);
+  border: 1px solid transparent;
+  color: #fff;
+  display: inline-block;
+  background-color: '#007bff';
+  font-weight: var(--font-bold);
+}
+
 .control {
     display: flex;
     align-items: center;
