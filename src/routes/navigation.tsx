@@ -4,6 +4,8 @@ import Suppliers from "../pages/suppliers/Suppliers";
 import Categories from "../pages/categories/Categories";
 import Roles from "../pages/roles/Roles";
 import Products from "../pages/products/Products";
+import { Dashboard } from "@/pages/dashboard/Dashboard";
+import { SalesPage } from "@/pages/sales/Sales";
 
 export const nav = [
   { path: "/", name: "Inicio", element: null, isMenu: true, isPrivate: false },
@@ -48,8 +50,21 @@ export const nav = [
      element: <Products />,
      isMenu: true,
      isPrivate: true,
-   }
-
+   },
+   {
+    path: "/dashboard",
+    name: "Dashboard",
+    element: <Dashboard />,
+    isMenu: true,
+    isPrivate: true,
+  },
+  {
+    path: "/vendas",
+    name: "Vendas",
+    element: <SalesPage />,
+    isMenu: true,
+    isPrivate: true,
+  }
   // { path:     "/private",  name: "Private",     element: <Login />,    isMenu: true,     isPrivate: false  },
   // { path:     "/account",  name: "Account",     element: <Login />,    isMenu: true,     isPrivate: false  },
 ];

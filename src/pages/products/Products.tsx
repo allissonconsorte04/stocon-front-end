@@ -11,6 +11,19 @@ import ModalProducts from '../../components/modal/ModalProducts';
 
 import Loading from '../../components/loading/Loading';
 
+import { Button } from '@/components/ui/button';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+
+import { jsPDF } from 'jspdf';
+
+
 export interface Product {
   id?: number;
   name: string;
@@ -21,8 +34,10 @@ export interface Product {
   measurement: string;
   supplier_id?: number | null;
   code: string;
+  barCode?: string;
   supplier?: Supplier;
   category?: Category;
+  sale_price: string;
 }
 
 const newProduct = {
@@ -31,7 +46,8 @@ const newProduct = {
   price: "0",
   quantity: 1,
   measurement: 'UN',
-  code: ''
+  code: '',
+  sale_price: "0"
 };
 
 const Products = () => {
@@ -84,75 +100,129 @@ const Products = () => {
     setModalVisible(false);
     setProductParaEditar(null);
     getAllProducts();
-  };
+  }
 
+  // Função para gerar o PDF
+  const generatePDF = () => {
+    const doc = new jsPDF();
+
+    doc.setFontSize(18);
+    doc.text('Relatório de Produtos', 20, 20);
+    let yPosition = 30; // Definindo a posição inicial para o texto
+    const maxY = 270; // Máxima posição Y na página
+
+    products.forEach((product) => {
+      // Verifica se há espaço suficiente para o próximo bloco de informações
+      if (yPosition + 60 > maxY) {
+        doc.addPage(); // Se não houver, adiciona uma nova página
+        yPosition = 20; // Reinicia a posição Y para a nova página
+      }
+
+      // Adiciona as informações do produto
+      doc.setFontSize(12);
+      doc.text(`ID: ${product.id}`, 20, yPosition);
+      yPosition += 10;
+
+      doc.text(`Nome: ${product.name}`, 20, yPosition);
+      yPosition += 10;
+
+      doc.text(`Descrição: ${product.description}`, 20, yPosition);
+      yPosition += 10;
+
+      doc.text(`Preço: ${product.price}`, 20, yPosition);
+      yPosition += 10;
+
+      doc.text(`Quantidade: ${product.quantity}`, 20, yPosition);
+      yPosition += 10;
+
+      doc.text(`Unidade: ${product.measurement}`, 20, yPosition);
+      yPosition += 10;
+
+      doc.text(`Código: ${product.code}`, 20, yPosition);
+      yPosition += 10;
+
+      doc.text(`Categoria: ${product.category?.name || 'N/A'}`, 20, yPosition);
+      yPosition += 10;
+
+      doc.text(`Fornecedor: ${product.supplier?.name || 'N/A'}`, 20, yPosition);
+      yPosition += 10;
+
+      doc.text(`Preço de Venda: ${product.sale_price}`, 20, yPosition);
+      yPosition += 15; // Adiciona mais espaçamento entre os produtos
+    });
+
+    // Salvar o PDF
+    doc.save('relatorio_produtos.pdf');
+  };
 
   return (
     <div className="products-container">
-      {loading ? (
-        <Loading /> // Exibe o componente de loading enquanto o estado "loading" for true
-      ) : (
-        <>
-          <div className="add-product-container">
-            <button
-              className="btn btn-add-product"
-              onClick={() => handleEditarProduct(newProduct)}
-            >
-              Adicionar Produto +
-            </button>
-            
+    {loading ? (
+      <Loading />
+    ) : (
+      <>
+        <div className="add-product-container mb-4">
+          <Button className="hover:bg-blue-600 rounded-xl" onClick={() => handleEditarProduct(newProduct)}>
+            Adicionar Produto +
+          </Button>
+          <Button className="hover:bg-green-600 rounded-xl ml-2" onClick={generatePDF}>
+              Gerar Relatório PDF
+            </Button>
+        </div>
 
-          </div>
-
-          <table>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Nome</th>
-                <th>Descrição</th>
-                <th>Preço</th>
-                <th>Quantidade</th>
-                <th>Unidade</th>
-                <th>Código</th>
-                <th>Categoria</th>
-                <th>Fornecedor</th>
-                <th>Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              {products.map((product) => (
-                <tr key={product.id}>
-                  <td className="id-columns">{product.id}</td>
-                  <td>{product.name}</td>
-                  <td>{product.description}</td>
-                  <td>{product.price}</td>
-                  <td>{product.quantity}</td>
-                  <td>{product.measurement}</td>
-                  <td>{product.code}</td>
-                  <td>{product.category?.name}</td>
-                  <td>{product.supplier?.name}</td>
-                  <td>
-                    <button onClick={() => handleEditarProduct(product)}>
+        <Table >
+          <TableHeader >
+            <TableRow>
+              <TableHead>ID</TableHead>
+              <TableHead>Nome</TableHead>
+              <TableHead>Descrição</TableHead>
+              <TableHead>Preço</TableHead>
+              <TableHead>Quantidade</TableHead>
+              <TableHead>Unidade</TableHead>
+              <TableHead>Código</TableHead>
+              <TableHead>Categoria</TableHead>
+              <TableHead>Fornecedor</TableHead>
+              <TableHead>Preço de Venda</TableHead>
+              <TableHead>Ações</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {products.map((product) => (
+              <TableRow key={product.id}>
+                <TableCell>{product.id}</TableCell>
+                <TableCell>{product.name}</TableCell>
+                <TableCell>{product.description}</TableCell>
+                <TableCell>{product.price}</TableCell>
+                <TableCell>{product.quantity}</TableCell>
+                <TableCell>{product.measurement}</TableCell>
+                <TableCell>{product.code}</TableCell>
+                <TableCell>{product.category?.name || 'N/A'}</TableCell>
+                <TableCell>{product.supplier?.name || 'N/A'}</TableCell>
+                <TableCell>{product.sale_price}</TableCell>
+                <TableCell>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" onClick={() => handleEditarProduct(product)}>
                       <FontAwesomeIcon icon={faEdit} />
-                    </button>
-                    <button onClick={() => handleRemoveProduct(product)}>
+                    </Button>
+                    <Button variant="destructive" size="sm" onClick={() => handleRemoveProduct(product)}>
                       <FontAwesomeIcon icon={faTrashAlt} />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
 
-          {isModalVisible && (
-            <ModalProducts
-              productData={productParaEditar}
-              fecharModal={fecharModal}
-            />
-          )}
-        </>
-      )}
-    </div>
+        {isModalVisible && (
+          <ModalProducts
+            productData={productParaEditar}
+            fecharModal={fecharModal}
+          />
+        )}
+      </>
+    )}
+  </div>
   );
 };
 

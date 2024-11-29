@@ -3,7 +3,7 @@ import axios from 'axios';
 export const uploadImage = async (file: any) => {
   try {
     const formData = new FormData();
-    formData.append('img', file); // 'img' deve ser o nome esperado no backend para o arquivo
+    formData.append('file', file); // 'img' deve ser o nome esperado no backend para o arquivo
 
     const response = await axios.post('http://localhost:4000/', formData, {
       headers: {

@@ -5,6 +5,8 @@ import { Product } from '../../pages/products/Products';
 import { Category } from "../../pages/categories/Categories";
 import { Supplier } from "../../pages/suppliers/Suppliers";
 import { uploadImage } from "../../services/api-ocr";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
 
 interface ModalProductsProps {
   productData: Product | null;
@@ -39,11 +41,12 @@ const ModalProducts: React.FC<ModalProductsProps> = ({
       code: productData?.code || "",
       supplier_id: productData?.supplier_id || null,
       category_id: productData?.category_id || null,
+      barCode: productData?.barCode || " ",
+      sale_price: productData?.sale_price ||"0",
     }),
     [productData]
   );
 
-  console.log(initialProductState.price)
 
   const [product, setProduct] = useState<Product>(initialProductState);
 
@@ -107,6 +110,7 @@ const ModalProducts: React.FC<ModalProductsProps> = ({
             measurement: nextProductData.measurement || prevProduct.measurement,
             supplier_id: nextProductData.supplier_id || prevProduct.supplier_id,
             category_id: nextProductData.category_id || prevProduct.category_id,
+            sale_price: nextProductData.sale_price || prevProduct.sale_price,
           }));
         } else {
           fecharModal(); // Se não houver mais produtos, fecha a modal  
@@ -136,7 +140,7 @@ const ModalProducts: React.FC<ModalProductsProps> = ({
         const fileType = selectedFile.type;
 
         if (fileType === "text/csv" || fileType === "text/xml") {
-          console.log("Processamento de CSV ou XML ainda não implementado.");
+          result = await uploadImage(selectedFile);
         } else if (fileType.startsWith("image/")) {
           result = await uploadImage(selectedFile);
         } else {
@@ -149,10 +153,12 @@ const ModalProducts: React.FC<ModalProductsProps> = ({
           setProduct({
             ...product,
             name: productData.name || product.name,
-            code: productData.barCode || product.code || productData.code,
-            description: productData.measurement || product.description,
-            price: productData.unit_price || product.price || productData.total_price,
-            quantity: productData.quaquantity || product.quantity,
+            code: productData.code || product.code || productData.code,
+            description: productData.description || product.description,
+            price: productData.unit_price || product.price,
+            quantity: productData.quantity || product.quantity,
+            measurement: productData.measurement || product.measurement,
+            sale_price: productData.sale_price || product.sale_price
           });
         }
 
@@ -184,11 +190,11 @@ const ModalProducts: React.FC<ModalProductsProps> = ({
               </span>
              )}  
           </div>
-          <button
+          <Button
             className="delete"
             aria-label="close"
             onClick={fecharModal}
-          ></button>
+          ></Button>
 
         </header>
         <section className="modal-card-body">
@@ -201,21 +207,21 @@ const ModalProducts: React.FC<ModalProductsProps> = ({
 
           <div>
             <div className="box-btns-prd">
-              <input
+              <Input
                 type="file"
                 accept=".csv, .xml, image/*"
                 onChange={handleFileChange}
               />
-              <button onClick={handleUploadFile} disabled={loading}>
+              <Button className="ml-2 bg-blue-600 text-white hover:border-black" onClick={handleUploadFile} disabled={loading}>
                 {loading ? "Carregando..." : "Upload Arquivo"}
-              </button>
+              </Button>
 
             </div>
 
             <div className="field">
               <label className="label">Nome</label>
               <div className="control">
-                <input
+                <Input
                   className="input"
                   type="text"
                   placeholder="Nome"
@@ -226,11 +232,10 @@ const ModalProducts: React.FC<ModalProductsProps> = ({
                 />
               </div>
             </div>
-            {/* Restante dos campos... */}
             <div className="field">
               <label className="label">Descrição</label>
               <div className="control">
-                <input
+                <Input
                   className="input"
                   type="text"
                   placeholder="Descrição"
@@ -247,7 +252,7 @@ const ModalProducts: React.FC<ModalProductsProps> = ({
             <div className="field">
               <label className="label">Preço</label>
               <div className="control">
-                <input
+                <Input
                   className="input"
                   type="text"
                   placeholder="Preço"
@@ -261,10 +266,30 @@ const ModalProducts: React.FC<ModalProductsProps> = ({
                 />
               </div>
             </div>
+
+            <div className="field">
+              <label className="label">Preço de venda</label>
+              <div className="control">
+                <Input
+                  className="input"
+                  type="text"
+                  placeholder="Preço de venda"
+                  value={product.sale_price}
+                  onChange={(e) =>
+                    setProduct({
+                      ...product,
+                      sale_price: e.target.value,
+                    })
+                  }
+                />
+              </div>
+            </div>
+
+
             <div className="field">
               <label className="label">Quantidade</label>
               <div className="control">
-                <input
+                <Input
                   className="input"
                   type="number"
                   placeholder="Quantidade"
@@ -278,10 +303,30 @@ const ModalProducts: React.FC<ModalProductsProps> = ({
                 />
               </div>
             </div>
+
+            <div className="field">
+              <label className="label">Unidade de medida</label>
+              <div className="control">
+                <Input
+                  className="input"
+                  type="string"
+                  placeholder="Unidade de medida"
+                  value={product.measurement}
+                  onChange={(e) =>
+                    setProduct({
+                      ...product,
+                      measurement: e.target.value,
+                    })
+                  }
+                />
+              </div>
+            </div>
+
+
             <div className="field">
               <label className="label">Código</label>
               <div className="control">
-                <input
+                <Input
                   required
                   className="input"
                   type="text"
@@ -354,7 +399,7 @@ const ModalProducts: React.FC<ModalProductsProps> = ({
 
         </section>
         <footer className="modal-card-foot">
-          <button className="button-salvar" onClick={handleSaveAndUpdate} disabled={isSaving}>
+          <button className="button-salvar px-4 bg-blue-500 text-white mr-2 h-full rounded-lg" onClick={handleSaveAndUpdate} disabled={isSaving}>
             {isSaving ? "Salvando..." : "Salvar"}
           </button>
           <button className="btn" onClick={fecharModal}>
