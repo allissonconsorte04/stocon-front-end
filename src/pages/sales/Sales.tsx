@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast"; // Supondo que você tenha um componente Toast para mostrar mensagens
 import api from "@/services/api"; // Para a requisição API
 import { SaleSuccessModal } from "@/components/SaleSuccessModal/SaleSuccessModal";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 export function SalesPage() {
     const [products, setProducts] = useState<any[]>([]); // Lista de produtos
@@ -20,6 +21,7 @@ export function SalesPage() {
     const [saleId, setSaleId] = useState<number | null>(null); // Para armazenar o ID da venda
     const [isModalOpen, setIsModalOpen] = useState(false); // Controle do modal
     const [searchQuery, setSearchQuery] = useState('');
+    const [openModalError, setOpenModalError] = useState(false); // Controle do modal
 
 
     const filteredProducts = products.filter((product) =>
@@ -46,15 +48,21 @@ export function SalesPage() {
     // Função para adicionar itens à venda
     const handleAddItem = () => {
         if (selectedProduct && quantity > 0) {
-            const productId = Number(selectedProduct); // Converte para número se necessário
+            const productId = Number(selectedProduct); // Converte para número
             const product = products.find((prod) => prod.id === productId);
-            console.log(product);
-
+    
             if (product) {
-                setSaleItems([
-                    ...saleItems,
-                    { product_id: product.id, quantity },
-                ]);
+                if (quantity > product.quantity) {
+                    setOpenModalError(true);
+                    setError(` ${product.quantity}`);
+                } else {
+                    // Adiciona o item à venda
+                    setSaleItems([
+                        ...saleItems,
+                        { product_id: product.id, quantity },
+                    ]);
+                    setError(null); // Limpa o erro, se houver
+                }
             } else {
                 console.log("Produto não encontrado.");
             }
@@ -64,6 +72,11 @@ export function SalesPage() {
     // Função para remover item da venda
     const handleRemoveItem = (index: number) => {
         setSaleItems(saleItems.filter((_, i) => i !== index));
+    };
+
+    const fecharModal = () => {
+        setOpenModalError(false);
+        setError(null); // Limpa o erro
     };
 
     // Função para enviar a venda
@@ -183,6 +196,22 @@ export function SalesPage() {
             {saleId && (
                 <SaleSuccessModal saleId={saleId} isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
             )}
+
+<Dialog open={openModalError}>
+    <DialogTrigger />
+    <DialogContent>
+        <DialogHeader>
+            <DialogTitle>Erro ao adicionar item</DialogTitle>
+        </DialogHeader>
+        <DialogDescription>
+            Não há estoque suficiente para este produto. <br />
+            Quantidade disponível: <strong>{error}</strong>
+        </DialogDescription>
+        <DialogFooter>
+            <Button onClick={fecharModal}>Fechar</Button>
+        </DialogFooter>
+    </DialogContent>
+</Dialog>
 
         </div>
     );

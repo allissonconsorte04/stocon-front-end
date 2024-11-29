@@ -4,6 +4,9 @@ import { Icon } from '@mdi/react';
 import { mdiLock } from '@mdi/js';
 import { AuthData } from '../../routes/AuthWrapper';
 import Loading from '../../components/loading/Loading';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
 
 function Login() {
   const { login } = AuthData();
@@ -62,9 +65,9 @@ function Login() {
           </div>
         </section>
         <footer className="modal-card-foot">
-          <button className="btn is-success" onClick={handleLogin} disabled={isLoading}>
+          <Button className="btn is-success" onClick={handleLogin} disabled={isLoading}>
             {isLoading ? 'Carregando...' : 'Entrar'}  {/* Exibe texto diferente enquanto carrega */}
-          </button>
+          </Button>
         </footer>
       </div>
       {isLoading && <Loading />}  {/* Exibe o componente Loading enquanto está processando o login */}
