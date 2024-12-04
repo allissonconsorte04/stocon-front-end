@@ -10,8 +10,6 @@ Este é o projeto desenvolvido para o Trabalho de Conclusão de Curso (TCC) no c
 - [Instalação](#instalação)  
 - [Execução](#execução)  
 - [Estrutura do Projeto](#estrutura-do-projeto)  
-- [Contribuição](#contribuição)  
-- [Licença](#licença)  
 
 ## Sobre o Projeto  
 Este sistema foi projetado para otimizar o gerenciamento de estoques, permitindo o cadastramento automático de produtos a partir de imagens capturadas. Ele é ideal para restaurantes, mercados ou outros estabelecimentos que precisam de uma gestão eficiente e prática dos itens em estoque.  
@@ -22,7 +20,7 @@ Este sistema foi projetado para otimizar o gerenciamento de estoques, permitindo
 - Interface de usuário responsiva, desenvolvida com Tailwind CSS.  
 - Integração com APIs para gerenciamento de dados.  
 
-## Tecologias Utilizadas  
+## Tecnologias Utilizadas  
 - **Frontend:** React, TypeScript  
 - **Estilização:** Tailwind CSS, Bulma  
 - **Gerenciamento de rotas:** React Router  
@@ -41,4 +39,39 @@ Clone o repositório do projeto:
 
 ```bash  
 git clone https://github.com/seu-usuario/nome-do-repositorio.git  
-cd nome-do-repositorio ```
+cd nome-do-repositorio
+```
+Instale as dependências:
+```bash  
+npm install  
+```
+## Execução
+Inicie o servidor de desenvolvimento:
+```bash  
+npm run dev   
+```
+Acesse a aplicação no navegador:
+```bash  
+http://localhost:5173 
+```
+Para criar a versão de produção:
+```bash  
+npm run build  
+```
+
+## Estrutura do Projeto
+Abaixo está uma visão geral da estrutura de diretórios do projeto:
+```bash  
+├── src/  
+│   ├── components/    # Componentes reutilizáveis  
+│   ├── pages/         # Páginas principais da aplicação  
+│   ├── services/      # Serviços para chamadas de API  
+│   ├── styles/        # Arquivos de estilo  
+│   ├── App.tsx        # Componente raiz  
+│   └── main.tsx       # Arquivo de entrada  
+├── public/            # Arquivos estáticos  
+├── package.json       # Gerenciamento de dependências  
+├── tailwind.config.js # Configuração do Tailwind CSS  
+├── vite.config.ts     # Configuração do Vite  
+└── README.md          # Documentação do projeto
+```
