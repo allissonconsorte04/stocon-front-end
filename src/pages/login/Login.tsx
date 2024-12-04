@@ -3,14 +3,26 @@ import './login.css';
 import { Icon } from '@mdi/react';
 import { mdiLock } from '@mdi/js';
 import { AuthData } from '../../routes/AuthWrapper';
+import Loading from '../../components/loading/Loading';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
 
 function Login() {
   const { login } = AuthData();
   const [userName, setUserName] = useState('');
   const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);  // Estado para controlar o carregamento
 
-  const handleLogin = () => {
-    login(userName, password)
+  const handleLogin = async () => {
+    setIsLoading(true);  // Ativa o carregamento
+    try {
+      await login(userName, password);  // Faz a autenticação
+    } catch (error) {
+      console.error("Login failed", error);  // Em caso de erro
+    } finally {
+      setIsLoading(false);  // Desativa o carregamento
+    }
   };
 
   return (
@@ -53,11 +65,12 @@ function Login() {
           </div>
         </section>
         <footer className="modal-card-foot">
-          <button className="btn is-success" onClick={handleLogin}>
-            Entrar
-          </button>
+          <Button className="btn is-success" onClick={handleLogin} disabled={isLoading}>
+            {isLoading ? 'Carregando...' : 'Entrar'}  {/* Exibe texto diferente enquanto carrega */}
+          </Button>
         </footer>
       </div>
+      {isLoading && <Loading />}  {/* Exibe o componente Loading enquanto está processando o login */}
     </div>
   );
 }

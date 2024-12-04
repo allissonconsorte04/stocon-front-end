@@ -39,6 +39,7 @@ const Users = () => {
   };
 
   const handleEditarUser = (user: User) => {
+    user.password = "1234"
     setUserParaEditar(user);
     setModalVisible(true);
   };
@@ -67,7 +68,7 @@ const Users = () => {
         <button
           className="btn btn-add-user"
           onClick={() =>
-            handleEditarUser({ email: '', first_name: '', last_name: ''})
+            handleEditarUser({ email: '', first_name: '', last_name: '', password: '123'})
           }
         >
           Adicionar User +
@@ -91,7 +92,7 @@ const Users = () => {
               <td>{user.first_name}</td>
               <td>{user.last_name}</td>
               <td className='actions-columns'>
-                <div style={{ justifyContent: 'center', display: 'flex' }}>
+                <div style={{ justifyContent: 'center', display: 'flex', gap: 10}}>
                   <button
                     className="btn-edit btn"
                     onClick={() => handleEditarUser(user)}
