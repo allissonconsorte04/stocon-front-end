@@ -1,10 +1,10 @@
 
-import * as React from "react";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
 import api from "@/services/api";
 import { useEffect, useState } from "react";
 import { Bar, BarChart, Pie, PieChart, CartesianGrid, XAxis, Tooltip, Legend, Cell } from "recharts";
+import { ptBR } from "date-fns/locale"; // Importa o idioma português do Brasil
 
 import {
   Card,
@@ -42,7 +42,7 @@ export function Dashboard() {
         const startFormatted = format(startDate, "yyyy-MM-dd");
         const endFormatted = format(endDate, "yyyy-MM-dd");
         console.log(startFormatted)
-        url = `/dashboard/start_date=${startFormatted}&end_date=${endFormatted}`;
+        url = `/dashboard/sales_and_products_by_date?start_date=${startFormatted}&end_date=${endFormatted}`;
       }
 
       api
@@ -67,6 +67,11 @@ export function Dashboard() {
     fetchDashboardData();
   }, [startDate, endDate]);
 
+  const limparData =()=>{
+    setStartDate(undefined)
+    setEndDate(undefined)
+  }
+  
   // Dados para os gráficos
   const barChartData = [
     { name: "Produtos", value: productValue },
@@ -82,13 +87,13 @@ export function Dashboard() {
     <div className="p-4">
       <h2 className="text-xl font-bold">Dashboard - Informações do Estoque</h2>
 
-      {/* <div className="my-4"> */}
+      <div className="my-4">
         {/* DatePickers para Data Inicial e Final */}
-        {/* <div className="flex gap-4">
+        <div className="flex gap-4">
           <div>
             <label>Data Inicial:</label>
-            <Popover>
-              <PopoverTrigger asChild>
+            <Popover >
+              <PopoverTrigger asChild className="ml-2">
                 <Button
                   variant={"outline"}
                   className="w-[280px] justify-start text-left font-normal"
@@ -103,15 +108,16 @@ export function Dashboard() {
                   selected={startDate}
                   onSelect={setStartDate}
                   initialFocus
+                  locale={ptBR}
                 />
               </PopoverContent>
             </Popover>
-          </div> */}
+          </div>
 
-          {/* <div>
+          <div>
             <label>Data Final:</label>
             <Popover>
-              <PopoverTrigger asChild>
+              <PopoverTrigger asChild className="ml-2">
                 <Button
                   variant={"outline"}
                   className="w-[280px] justify-start text-left font-normal"
@@ -125,13 +131,16 @@ export function Dashboard() {
                   mode="single"
                   selected={endDate}
                   onSelect={setEndDate}
-                  initialFocus
+                  initialFocus  
+                  locale={ptBR}
                 />
               </PopoverContent>
             </Popover>
           </div>
+        <Button onClick={limparData}>Limpar </Button>
+
         </div>
-      </div> */}
+      </div>
 
       <div className="grid grid-cols-2 gap-4 my-4">
         {/* KPI Cards */}

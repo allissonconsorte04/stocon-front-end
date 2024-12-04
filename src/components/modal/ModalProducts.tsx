@@ -28,21 +28,57 @@ const ModalProducts: React.FC<ModalProductsProps> = ({
   const [currentProductIndex, setCurrentProductIndex] = useState(0);
   const [productsData, setProductsData] = useState<Product[]>([]);  // Tipagem correta para o array
 
+  const formatCurrency = (value: string): string => {
+    const numericValue = Number(value.replace(/[^\d]/g, "")) / 100;
+    return isNaN(numericValue)
+      ? ""
+      : numericValue.toLocaleString("pt-BR", {
+          style: "currency",
+          currency: "BRL",
+        });
+  };
+  
+  const parseCurrency = (formattedValue: string): number => {
+    return Number(formattedValue.replace(/[^\d,-]/g, "").replace(",", "."));
+  };
 
+
+
+  const handlePriceChange = (field: 'price' | 'sale_price') => (e: React.ChangeEvent<HTMLInputElement>) => {
+    const rawValue = e.target.value;
+
+    // Remove caracteres não numéricos e vírgula
+    const numericValue = rawValue.replace(/[^\d,]/g, "");
+
+    // Se houver mais de 2 casas decimais, limita a 2 casas
+    const formattedValue = numericValue.replace(
+      /(\d)(?=(\d{3})+(?!\d))/g,
+      "$1."
+    ).replace(/,/g, "");
+
+    // Converte o valor formatado para número
+    const parsedValue = parseCurrency(formattedValue);
+
+    // Atualiza o estado com o valor formatado
+    setProduct((prevProduct) => ({
+      ...prevProduct,
+      [field]: parsedValue, // Atualiza o campo especificado (price ou sale_price)
+    }));
+  };
 
   const initialProductState: Product = useMemo(
     () => ({
       id: productData?.id || undefined,
       name: productData?.name || "",
       description: productData?.description || "",
-      price: productData?.price || '',
+      price: productData?.price || 0,
       quantity: productData?.quantity || 1,
       measurement: productData?.measurement || "UN",
       code: productData?.code || "",
       supplier_id: productData?.supplier_id || null,
       category_id: productData?.category_id || null,
-      barCode: productData?.barCode || " ",
-      sale_price: productData?.sale_price ||"0",
+      bar_code: productData?.bar_code || "",
+      sale_price: productData?.sale_price || 0,
     }),
     [productData]
   );
@@ -64,12 +100,14 @@ const ModalProducts: React.FC<ModalProductsProps> = ({
   }, [initialProductState]);
 
   const validateForm = () => {
+    if (product.bar_code = "") return "Digite o codigo de barras do produto.";
+    if (!product.bar_code) return "Digite o codigo de barras do produto.";
     if (!product.name) return "Nome é obrigatório.";
-    if (product.price <= '0') return "Preço deve ser maior que zero.";
+    if (product.price <= 0) return "Valor do produto deve ser maior que zero.";
     if (product.quantity <= 0) return "Quantidade deve ser maior que zero.";
     if (!product.category_id) return "Selecione uma categoria.";
     if (!product.supplier_id) return "Selecione um fornecedor.";
-    if (!product.code) return "Digite o codigo do produto.";
+    if (!product.sale_price) return "Valor de venda deve ser maior que zero.";
     return null;
   };
 
@@ -82,10 +120,24 @@ const ModalProducts: React.FC<ModalProductsProps> = ({
 
     setIsSaving(true);
 
+      // Função para converter valores com vírgula para número
+      const convertToNumber = (value: string): number => {
+        // Substitui a vírgula por ponto e converte para número
+
+        return parseFloat(value.replace(",", "."))/100;
+      };
+
+
+      const productWithConvertedPrices = {
+        ...product,
+        price: convertToNumber(product.price.toString()), // Converte price
+        sale_price: convertToNumber(product.sale_price.toString()), // Converte sale_price
+      };
+
     // Salva o produto atual na API
     const request = product.id
-      ? api.put(`/products/${product.id}`, product)
-      : api.post("/products/", product);
+      ? api.put(`/products/${product.id}`, productWithConvertedPrices)
+      : api.post("/products/", productWithConvertedPrices);
 
     request
       .then((response) => {
@@ -111,6 +163,7 @@ const ModalProducts: React.FC<ModalProductsProps> = ({
             supplier_id: nextProductData.supplier_id || prevProduct.supplier_id,
             category_id: nextProductData.category_id || prevProduct.category_id,
             sale_price: nextProductData.sale_price || prevProduct.sale_price,
+            bar_code: nextProductData.bar_code || prevProduct.bar_code,
           }));
         } else {
           fecharModal(); // Se não houver mais produtos, fecha a modal  
@@ -158,7 +211,8 @@ const ModalProducts: React.FC<ModalProductsProps> = ({
             price: productData.unit_price || product.price,
             quantity: productData.quantity || product.quantity,
             measurement: productData.measurement || product.measurement,
-            sale_price: productData.sale_price || product.sale_price
+            sale_price: productData.sale_price || product.sale_price,
+            bar_code: productData.bar_code || product.bar_code
           });
         }
 
@@ -186,9 +240,9 @@ const ModalProducts: React.FC<ModalProductsProps> = ({
           <div className="product-counter">
             {productsData.length > 0 && (
               <span className="font-bold">
-               {`Produto ${currentProductIndex + 1} de ${productsData.length}`}
+                {`Produto ${currentProductIndex + 1} de ${productsData.length}`}
               </span>
-             )}  
+            )}
           </div>
           <Button
             className="delete"
@@ -218,6 +272,20 @@ const ModalProducts: React.FC<ModalProductsProps> = ({
 
             </div>
 
+            <div className="field mt-3">
+              <label className="label">Código de barras</label>
+              <div className="control">
+                <Input
+                  className="input"
+                  type="text"
+                  placeholder="Codigo de barras"
+                  value={product.bar_code}
+                  onChange={(e) =>
+                    setProduct({ ...product, bar_code: e.target.value })
+                  }
+                />
+              </div>
+            </div>
             <div className="field">
               <label className="label">Nome</label>
               <div className="control">
@@ -249,38 +317,29 @@ const ModalProducts: React.FC<ModalProductsProps> = ({
                 />
               </div>
             </div>
+
             <div className="field">
-              <label className="label">Preço</label>
+              <label className="label">Valor do produto</label>
               <div className="control">
                 <Input
                   className="input"
                   type="text"
-                  placeholder="Preço"
-                  value={product.price}
-                  onChange={(e) =>
-                    setProduct({
-                      ...product,
-                      price: e.target.value,
-                    })
-                  }
+                  placeholder="Valor do produto"
+                  value={formatCurrency(product.price.toString())} // Exibe o valor formatado
+                  onChange={handlePriceChange('price')} // Chama a função com 'price' como parâmetro
                 />
               </div>
             </div>
 
             <div className="field">
-              <label className="label">Preço de venda</label>
+              <label className="label">Valor de venda</label>
               <div className="control">
                 <Input
                   className="input"
                   type="text"
-                  placeholder="Preço de venda"
-                  value={product.sale_price}
-                  onChange={(e) =>
-                    setProduct({
-                      ...product,
-                      sale_price: e.target.value,
-                    })
-                  }
+                  placeholder="Valor de venda"
+                  value={formatCurrency(product.sale_price.toString())} // Exibe o valor formatado
+                  onChange={handlePriceChange('sale_price')} // Chama a função com 'sale_price' como parâmetro
                 />
               </div>
             </div>

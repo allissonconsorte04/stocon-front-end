@@ -17,6 +17,7 @@ const ModalUsers: React.FC<ModalUsersProps> = ({
     email: '',
     first_name: '',
     last_name: '',
+    password: "123"
   });
 
   useEffect(() => {
@@ -76,20 +77,6 @@ const ModalUsers: React.FC<ModalUsersProps> = ({
                 />
               </div>
             </div>
-            {!user.id && (<div className="field">
-              <label className="label">Senha</label>
-              <div className="control">
-                <input
-                  className="input"
-                  type="password"
-                  placeholder="Senha"
-                  value={user.password}
-                  onChange={(e) =>
-                    setUser({ ...user, password: e.target.value })
-                  }
-                />
-              </div>
-            </div>)}
             <div className="field">
               <label className="label">Nome</label>
               <div className="control">
@@ -120,7 +107,7 @@ const ModalUsers: React.FC<ModalUsersProps> = ({
             </div>
           </div>
         </section>
-        <footer className="modal-card-foot">
+        <footer className="modal-card-foot gap-2">
           <button className="btn is-success" onClick={handleSalvar}>
             Salvar
           </button>

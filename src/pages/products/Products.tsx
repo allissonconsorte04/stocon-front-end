@@ -28,26 +28,27 @@ export interface Product {
   id?: number;
   name: string;
   description: string;
-  price: string;
+  price: number;
   quantity: number;
   category_id?: number | null;
   measurement: string;
   supplier_id?: number | null;
   code: string;
-  barCode?: string;
+  bar_code: string;
   supplier?: Supplier;
   category?: Category;
-  sale_price: string;
+  sale_price: number;
 }
 
 const newProduct = {
+  bar_code: '',
   name: '',
   description: '',
-  price: "0",
+  price: 0,
   quantity: 1,
   measurement: 'UN',
   code: '',
-  sale_price: "0"
+  sale_price: 0,
 };
 
 const Products = () => {
@@ -174,15 +175,15 @@ const Products = () => {
           <TableHeader >
             <TableRow>
               <TableHead>ID</TableHead>
+              <TableHead>Código</TableHead>
               <TableHead>Nome</TableHead>
               <TableHead>Descrição</TableHead>
               <TableHead>Preço</TableHead>
+              <TableHead>Preço de Venda</TableHead>
               <TableHead>Quantidade</TableHead>
               <TableHead>Unidade</TableHead>
-              <TableHead>Código</TableHead>
               <TableHead>Categoria</TableHead>
               <TableHead>Fornecedor</TableHead>
-              <TableHead>Preço de Venda</TableHead>
               <TableHead>Ações</TableHead>
             </TableRow>
           </TableHeader>
@@ -190,15 +191,15 @@ const Products = () => {
             {products.map((product) => (
               <TableRow key={product.id}>
                 <TableCell>{product.id}</TableCell>
+                <TableCell>{product.bar_code}</TableCell>
                 <TableCell>{product.name}</TableCell>
                 <TableCell>{product.description}</TableCell>
-                <TableCell>{product.price}</TableCell>
+                <TableCell>R$ {product.price}</TableCell>
+                <TableCell>R$ {product.sale_price}</TableCell>
                 <TableCell>{product.quantity}</TableCell>
                 <TableCell>{product.measurement}</TableCell>
-                <TableCell>{product.code}</TableCell>
                 <TableCell>{product.category?.name || 'N/A'}</TableCell>
                 <TableCell>{product.supplier?.name || 'N/A'}</TableCell>
-                <TableCell>{product.sale_price}</TableCell>
                 <TableCell>
                   <div className="flex gap-2">
                     <Button variant="outline" size="sm" onClick={() => handleEditarProduct(product)}>

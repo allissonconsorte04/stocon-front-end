@@ -17,8 +17,8 @@ export const nav = [
     isPrivate: false,
   },
   {
-    path: "/users",
-    name: "Users",
+    path: "/clientes",
+    name: "Clientes",
     element: <Users />,
     isMenu: true,
     isPrivate: true,
@@ -41,7 +41,7 @@ export const nav = [
     path: "/roles",
     name: "Permissões",
     element: <Roles />,
-    isMenu: true,
+    isMenu: false,
     isPrivate: true,
   },
   {
