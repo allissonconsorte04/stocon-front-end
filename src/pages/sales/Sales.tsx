@@ -137,7 +137,7 @@ export function SalesPage() {
 
             {/* Seleção de Usuário */}
             <div className="mb-4 ">
-                <Label htmlFor="user">Selecione o Usuário</Label>
+                <Label htmlFor="user">Selecione o Cliente</Label>
                 <Select value={userId ? String(userId) : undefined} onValueChange={(value) => setUserId(Number(value))}>
                     <SelectTrigger className=" hover:bg-gray-50 ">
                         <SelectValue placeholder="Selecione um usuário" />

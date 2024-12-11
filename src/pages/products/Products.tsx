@@ -194,7 +194,7 @@ const Products = () => {
                 <TableCell>{product.bar_code}</TableCell>
                 <TableCell>{product.name}</TableCell>
                 <TableCell>{product.description}</TableCell>
-                <TableCell>R$ {product.price}</TableCell>
+                <TableCell>R$ {product.price*100}</TableCell>
                 <TableCell>R$ {product.sale_price}</TableCell>
                 <TableCell>{product.quantity}</TableCell>
                 <TableCell>{product.measurement}</TableCell>

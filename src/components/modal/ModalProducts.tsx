@@ -29,7 +29,7 @@ const ModalProducts: React.FC<ModalProductsProps> = ({
   const [productsData, setProductsData] = useState<Product[]>([]);  // Tipagem correta para o array
 
   const formatCurrency = (value: string): string => {
-    const numericValue = Number(value.replace(/[^\d]/g, "")) / 100;
+    const numericValue = Number(value.replace(/[^\d]/g, "")) /100;
     return isNaN(numericValue)
       ? ""
       : numericValue.toLocaleString("pt-BR", {
@@ -100,7 +100,6 @@ const ModalProducts: React.FC<ModalProductsProps> = ({
   }, [initialProductState]);
 
   const validateForm = () => {
-    if (product.bar_code = "") return "Digite o codigo de barras do produto.";
     if (!product.bar_code) return "Digite o codigo de barras do produto.";
     if (!product.name) return "Nome é obrigatório.";
     if (product.price <= 0) return "Valor do produto deve ser maior que zero.";
@@ -151,6 +150,8 @@ const ModalProducts: React.FC<ModalProductsProps> = ({
           setCurrentProductIndex(nextIndex); // Atualiza o índice do produto atual
           const nextProductData = productsData[nextIndex];
           // Carrega os dados do próximo produto
+
+          console.log(nextProductData)
 
           setProduct((prevProduct) => ({
             ...prevProduct,  // Aqui você usa 'prevProduct' corretamente, que é o valor anterior
@@ -208,7 +209,7 @@ const ModalProducts: React.FC<ModalProductsProps> = ({
             name: productData.name || product.name,
             code: productData.code || product.code || productData.code,
             description: productData.description || product.description,
-            price: productData.unit_price || product.price,
+            price: productData.price || product.price,
             quantity: productData.quantity || product.quantity,
             measurement: productData.measurement || product.measurement,
             sale_price: productData.sale_price || product.sale_price,
